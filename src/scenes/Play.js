@@ -18,10 +18,10 @@ class Play extends Phaser.Scene {
         this.starfield = this.add.tileSprite(0,0,640,480, 'starfield').setOrigin(0,0);
 
         // white rectangle borders
-        this.add.rectangle(5  ,5  ,630,32 , 0xFFFFFF).setOrigin(0,0);
-        this.add.rectangle(5  ,443,630,32 , 0xFFFFFF).setOrigin(0,0);
-        this.add.rectangle(5  ,5  ,32 ,455, 0xFFFFFF).setOrigin(0,0);
-        this.add.rectangle(603,5  ,32 ,455, 0xFFFFFF).setOrigin(0,0);
+        this.add.rectangle(5  ,   5, 630,  32, 0xFFFFFF).setOrigin(0,0);
+        this.add.rectangle(5  , 443, 630,  32, 0xFFFFFF).setOrigin(0,0);
+        this.add.rectangle(5  ,   5,  32, 455, 0xFFFFFF).setOrigin(0,0);
+        this.add.rectangle(603,   5,  32, 455, 0xFFFFFF).setOrigin(0,0);
         //green UI background
         this.add.rectangle(37 ,42 ,566,64 , 0x00FF00).setOrigin(0.0);
 
@@ -72,9 +72,9 @@ class Play extends Phaser.Scene {
 
         // 60-second play clock
         scoreConfig.fixedWidth = 0;
-        this.clock = this.time.delayedCall(60000, () => {
+        this.clock = this.time.delayedCall(game.settings.gameTimer, () => {
             this.add.text(game.config.width/2, game.config.height/2, 'GAME OVER', scoreConfig).setOrigin(0.5);
-            this.add.text(game.config.width/2, game.config.height/2 + 64, '(F)ire to Restart', scoreConfig).setOrigin(0.5);
+            this.add.text(game.config.width/2, game.config.height/2 + 64, '(F)ire to Restart or <- for Menu', scoreConfig).setOrigin(0.5);
             highscore.push(this.p1Score);
             this.gameOver = true;
         }, null, this);
@@ -82,7 +82,10 @@ class Play extends Phaser.Scene {
 
     update() {
         if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyF)) {
-            this.scene.restart(this.p1Score);
+            this.scene.restart();// I removed a this.p1Score. Don't understand why that's there.
+        }
+        if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyF)) {
+            this.scene.start("menuScene");
         }
 
         //scroll starfield
@@ -136,5 +139,8 @@ class Play extends Phaser.Scene {
         // score increment and repaint
         this.p1Score += ship.points;
         this.scoreLeft.text = this.p1Score;
+
+        this.sound.play('sfx_explosion');
+        console.log('played audio');
     }
 }

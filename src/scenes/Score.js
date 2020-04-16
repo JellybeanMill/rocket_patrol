@@ -14,7 +14,7 @@ class Score extends Phaser.Scene {
             fontStyle: 'strong',
             backgroundColor: '#F38141',
             color: '#843605',
-            align: 'right',
+            align: 'center',
             padding: {
                 top: 5,
                 bottom: 5,
@@ -23,20 +23,25 @@ class Score extends Phaser.Scene {
         }
         
         // Reading the array of scores. 
+        this.bigScores = new Array;
+        highscore.sort();
+        for(var i = 0; i < highscore.length && i<10; i++){
+            this.bigScores.push(highscore[i]);
+        }
 
-
-        
-
-        // Dumping those things onto the screen
-
-
-
-        // Putting the buttons to go back to main menu.
+        // Dumping those scores onto the screen
+        this.add.text(game.config.width/2, game.config.height/15, "HIGH SCORES", scoreboardtext);
+        for (var i = 0; i < 10; i++) {
+            this.add.text(game.config.width/2, game.config.height/15*(i+3), "HIGH SCORES", scoreboardtext);
+        }
+        this.add.text(game.config.width/2, game.config.heigh/15*14, "CLICK to return", scoreboardtext);
     }
 
     update() {
-        // keyboard inputs for 
+        // just to check for the click
 
-
+        if(Phaser.Input.Pointer.leftButtonReleased()){
+            this.scene.start("menuScene");
+        }
     }
 }
