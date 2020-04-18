@@ -33,14 +33,10 @@ class Play extends Phaser.Scene {
         this.ship02 = new Spaceship(this, game.config.width+96, 196, 'spaceship', 0, 30).setOrigin(0,0);
         this.ship03 = new Spaceship(this, game.config.width, 260, 'spaceship', 0, 30).setOrigin(0,0);
 
-
-
-
         // define keyboard keys
         keyF = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
         keyLEFT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
         keyRIGHT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
-
 
         // animation config
         this.anims.create({
@@ -73,20 +69,31 @@ class Play extends Phaser.Scene {
         // 60-second play clock
         scoreConfig.fixedWidth = 0;
         this.clock = this.time.delayedCall(game.settings.gameTimer, () => {
-            this.add.text(game.config.width/2, game.config.height/2, 'GAME OVER', scoreConfig).setOrigin(0.5);
-            this.add.text(game.config.width/2, game.config.height/2 + 64, '(F)ire to Restart or <- for Menu', scoreConfig).setOrigin(0.5);
             highscore.push(this.p1Score);
+            this.add.text(game.config.width/2, game.config.height/2-64, 'GAME OVER', scoreConfig).setOrigin(0.5);
+            highscore.sort();
+            this.add.text(game.config.width/2, game.config.height/2, 'Current High Score', scoreConfig).setOrigin(0.5);
+            this.add.text(game.config.width/2, game.config.height/2+32, highscore[0], scoreConfig).setOrigin(0.5);
+            this.add.text(game.config.width/2, game.config.height/2+96, 'Click to Continue', scoreConfig).setOrigin(0.5);
             this.gameOver = true;
         }, null, this);
+
+        //mouse inputs
+        this.input.mouse.disableContextMenu();
+
+        this.input.on('pointerup', function () {
+            if(this.gameOver == true){
+                this.scene.start("menuScene");
+            }
+        }, this);
+
+
     }
 
     update() {
-        if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyF)) {
-            this.scene.restart();// I removed a this.p1Score. Don't understand why that's there.
-        }
-        if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyF)) {
-            this.scene.start("menuScene");
-        }
+        //if (this.gameOver && Phaser.Input.Pointer.leftButtonReleased()) {
+        //    this.scene.start("scoreScene");
+        //}
 
         //scroll starfield
         this.starfield.tilePositionX -= 4;

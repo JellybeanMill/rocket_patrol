@@ -32,16 +32,18 @@ class Score extends Phaser.Scene {
         // Dumping those scores onto the screen
         this.add.text(game.config.width/2, game.config.height/15, "HIGH SCORES", scoreboardtext);
         for (var i = 0; i < 10; i++) {
-            this.add.text(game.config.width/2, game.config.height/15*(i+3), "HIGH SCORES", scoreboardtext);
+            this.add.text(game.config.width/2, game.config.height/15*(i+3), highscore[i], scoreboardtext);
         }
         this.add.text(game.config.width/2, game.config.heigh/15*14, "CLICK to return", scoreboardtext);
+
+        this.input.on('pointerup', function () {
+            if(this.gameOver = true){
+                this.scene.start("menuScene");
+            }
+        }, this);
     }
 
     update() {
-        // just to check for the click
 
-        if(Phaser.Input.Pointer.leftButtonReleased()){
-            this.scene.start("menuScene");
-        }
     }
 }
