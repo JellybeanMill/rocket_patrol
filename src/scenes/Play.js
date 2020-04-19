@@ -18,9 +18,9 @@ class Play extends Phaser.Scene {
         this.starfield = this.add.tileSprite(0,0,640,480, 'starfield').setOrigin(0,0);
 
         // white rectangle borders
-        this.add.rectangle(5  ,   5, 630,  32, 0xFFFFFF).setOrigin(0,0);
-        this.add.rectangle(5  , 443, 630,  32, 0xFFFFFF).setOrigin(0,0);
-        this.add.rectangle(5  ,   5,  32, 455, 0xFFFFFF).setOrigin(0,0);
+        this.add.rectangle(  5,   5, 630,  32, 0xFFFFFF).setOrigin(0,0);
+        this.add.rectangle(  5, 443, 630,  32, 0xFFFFFF).setOrigin(0,0);
+        this.add.rectangle(  5,   5,  32, 455, 0xFFFFFF).setOrigin(0,0);
         this.add.rectangle(603,   5,  32, 455, 0xFFFFFF).setOrigin(0,0);
         //green UI background
         this.add.rectangle(37 ,42 ,566,64 , 0x00FF00).setOrigin(0.0);
@@ -49,7 +49,7 @@ class Play extends Phaser.Scene {
         this.p1Score = 0;
 
         // score display
-        let scoreConfig = {
+        this.scoreConfig = {
             fontFamily: 'Courier',
             fontSize: '28px',
             backgroundColor: '#F38141',
@@ -61,22 +61,14 @@ class Play extends Phaser.Scene {
             },
             fixedWidth: 100
         }
-        this.scoreLeft = this.add.text(69, 54, this.p1Score, scoreConfig);
+        this.scoreLeft = this.add.text(69, 54, this.p1Score, this.scoreConfig);
 
         // game over flag
         this.gameOver = false;
 
         // 60-second play clock
-        scoreConfig.fixedWidth = 0;
-        this.clock = this.time.delayedCall(game.settings.gameTimer, () => {
-            highscore.push(this.p1Score);
-            this.add.text(game.config.width/2, game.config.height/2-64, 'GAME OVER', scoreConfig).setOrigin(0.5);
-            highscore.sort();
-            this.add.text(game.config.width/2, game.config.height/2, 'Current High Score', scoreConfig).setOrigin(0.5);
-            this.add.text(game.config.width/2, game.config.height/2+32, highscore[0], scoreConfig).setOrigin(0.5);
-            this.add.text(game.config.width/2, game.config.height/2+96, 'Click to Continue', scoreConfig).setOrigin(0.5);
-            this.gameOver = true;
-        }, null, this);
+        this.scoreConfig.fixedWidth = 0;
+        this.clock = this.time.delayedCall(game.settings.gameTimer, this.endScreen, null, this);
 
         //mouse inputs
         this.input.mouse.disableContextMenu();
@@ -87,6 +79,9 @@ class Play extends Phaser.Scene {
             }
         }, this);
 
+        //time updates
+        this.timeLeft = this.add.text(this.p1Rocket.x,this.p1Rocket.y,6,this.scoreConfig).setOrigin(0.5,0.5);
+        
 
     }
 
@@ -120,6 +115,12 @@ class Play extends Phaser.Scene {
             this.shipExplode(this.ship01);
         }
 
+        // updating Rocket Timer
+        if(Phaser.Math.Snap.Ceil(6 - this.clock.getElapsedSeconds(),1) != this.timeLeft.text){
+            this.timeLeft.text = Phaser.Math.Snap.Ceil(6 - this.clock.getElapsedSeconds(),1);
+        }
+        this.timeLeft.x = this.p1Rocket.x;
+        this.timeLeft.y = this.p1Rocket.y;
     }
 
     checkCollision(rocket, ship) {
@@ -149,5 +150,19 @@ class Play extends Phaser.Scene {
 
         this.sound.play('sfx_explosion');
         console.log('played audio');
+
+        // reset 6 second timer
+        this.clock.remove();
+        this.clock = this.time.delayedCall(game.settings.gameTimer, this.endScreen, null, this);
+    }
+
+    endScreen() {
+        highscore.push(this.p1Score);
+        this.add.text(game.config.width/2, game.config.height/2-64, 'GAME OVER', this.scoreConfig).setOrigin(0.5);
+        highscore.sort();
+        this.add.text(game.config.width/2, game.config.height/2, 'Current High Score', this.scoreConfig).setOrigin(0.5);
+        this.add.text(game.config.width/2, game.config.height/2+32, highscore[highscore.length-1], this.scoreConfig).setOrigin(0.5);
+        this.add.text(game.config.width/2, game.config.height/2+96, 'Click to Continue', this.scoreConfig).setOrigin(0.5);
+        this.gameOver = true;
     }
 }
