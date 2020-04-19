@@ -8,61 +8,52 @@ class Menu extends Phaser.Scene {
         this.load.audio('sfx_select', './assets/blip_select12.wav');
         this.load.audio('sfx_explosion', './assets/explosion38.wav');
         this.load.audio('sfx_rocket', './assets/rocket_shot.wav');
+        this.load.image('title', './assets/title_sprite.png')
+        this.load.image('starfield','./assets/starfield.png');
     }
 
     create() {
         this.add.text(20,20, "Rocket Patrol Menu");
+        this.add.image(0,0,'starfield').setScale(2,2);
+        this.add.image(game.config.width/2, game.config.width/4, 'title').setOrigin(0.5,0.5);
 
         // menu display
         let menuConfig = {
-            fontFamily: 'Courier',
+            fontFamily: 'Arial',
             fontSize: '28px',
-            backgroundColor: '#F38141',
-            color: '#843685',
-            align: 'right',
+            color: '#8b1db5',
+            stroke: '#fff',
+            strokeThickness: 2,
+            align: 'center',
             padding: {
                 top: 5,
                 bottom: 5,
             },
-            fixedWidth: 0
         }
 
         // show menu text
         let centerX = game.config.width/2;
         let centerY = game.config.height/2;
         let textSpacer = 64;
-
-        this.add.text(centerX, centerY-textSpacer, 'RocketPatrol', menuConfig).setOrigin(0.5);
-        this.add.text(centerX, centerY, 'Use <--> arrows to move & (F) to Fire',menuConfig).setOrigin(0.5);
-        menuConfig.backgroundColor = '#00FF00';
-        menuConfig.color = '#000';
-        this.add.text(centerX, centerY + textSpacer, 'Press <- for Easy or -> for Hard', menuConfig).setOrigin(0.5);
+        this.add.text(centerX, centerY + textSpacer, 'Click to Continue', menuConfig).setOrigin(0.5);
 
         //define keys
         keyLEFT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
         keyRIGHT = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
 
         //this.scene.start("playScene");
-    }
 
-    update() {
-        if (Phaser.Input.Keyboard.JustDown(keyLEFT)) {
-            //easy mode
-            game.settings = {
-                spaceshipSpeed: 3,
-                gameTimer: 6000
-            }
-            this.sound.play('sfx_select');
-            this.scene.start("playScene");
-        }
-        if (Phaser.Input.Keyboard.JustDown(keyRIGHT)) {
-            //easy mode
+        // for continuing
+        this.input.mouse.disableContextMenu();
+
+        this.input.on('pointerup', function () {
             game.settings = {
                 spaceshipSpeed: 4,
                 gameTimer: 6000
             }
             this.sound.play('sfx_select');
             this.scene.start("playScene");
-        }
+        }, this);
+
     }
 }

@@ -5,33 +5,25 @@ class Play extends Phaser.Scene {
 
     preload() {
 
-        this.load.image('rocket', './assets/rocket.png');
+        this.load.image('rocket', './assets/missle.png');
         this.load.image('spaceship', './assets/spaceship.png');
         this.load.image('starfield','./assets/starfield.png');
 
         // load sprite sheet
-        this.load.spritesheet('explosion', './assets/explosion.png', {frameWidth: 64, frameHeight: 32, startFrame: 0, endFrame: 9});
+        this.load.spritesheet('person', './assets/person_sprite.png', {frameWidth: 32, frameHeight: 32, startFrame: 0, endFrame: 6});
     }
 
     create() {
         //place tile sprite
         this.starfield = this.add.tileSprite(0,0,640,480, 'starfield').setOrigin(0,0);
 
-        // white rectangle borders
-        this.add.rectangle(  5,   5, 630,  32, 0xFFFFFF).setOrigin(0,0);
-        this.add.rectangle(  5, 443, 630,  32, 0xFFFFFF).setOrigin(0,0);
-        this.add.rectangle(  5,   5,  32, 455, 0xFFFFFF).setOrigin(0,0);
-        this.add.rectangle(603,   5,  32, 455, 0xFFFFFF).setOrigin(0,0);
-        //green UI background
-        this.add.rectangle(37 ,42 ,566,64 , 0x00FF00).setOrigin(0.0);
-
         // adding the rocket
         this.p1Rocket = new Rocket(this, game.config.width/2, 431, 'rocket').setScale(0.5,0.5);
    
         // adding spaceships
-        this.ship01 = new Spaceship(this, game.config.width+192, 132, 'spaceship', 0, 30).setOrigin(0,0);
-        this.ship02 = new Spaceship(this, game.config.width+96, 196, 'spaceship', 0, 30).setOrigin(0,0);
-        this.ship03 = new Spaceship(this, game.config.width, 260, 'spaceship', 0, 30).setOrigin(0,0);
+        this.ship01 = new Spaceship(this, game.config.width+192, 132, 'person', 0, 30).setOrigin(0,0);
+        this.ship02 = new Spaceship(this, game.config.width+96, 196, 'person', 0, 30).setOrigin(0,0);
+        this.ship03 = new Spaceship(this, game.config.width, 260, 'person', 0, 30).setOrigin(0,0);
 
         // define keyboard keys
         keyF = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
@@ -40,20 +32,30 @@ class Play extends Phaser.Scene {
 
         // animation config
         this.anims.create({
-            key: 'explode',
-            frames: this.anims.generateFrameNumbers('explosion', {start:0, end:9, first:0}),
-            frameRate: 30
+            key: 'death',
+            frames: this.anims.generateFrameNumbers('person', {start:4, end:6, first:4}),
+            frameRate: 3
         });
+
+        this.anims.create({
+            key: 'walk',
+            frames: this.anims.generateFrameNumbers('person', {start:0, end:3, first:0}),
+            frameRate: 3,
+            repeat: -1
+        })
+        this.ship01.play('walk');
+        this.ship02.play('walk');
+        this.ship03.play('walk');
 
         // score
         this.p1Score = 0;
 
         // score display
         this.scoreConfig = {
-            fontFamily: 'Courier',
+            fontFamily: 'Arial',
             fontSize: '28px',
-            backgroundColor: '#F38141',
-            color: '#843605',
+            backgroundColor: '#fff',
+            color: '#8b1db5',
             align: 'right',
             padding: {
                 top: 5,
@@ -61,7 +63,6 @@ class Play extends Phaser.Scene {
             },
             fixedWidth: 100
         }
-        this.scoreLeft = this.add.text(69, 54, this.p1Score, this.scoreConfig);
 
         // game over flag
         this.gameOver = false;
@@ -80,9 +81,30 @@ class Play extends Phaser.Scene {
         }, this);
 
         //time updates
-        this.timeLeft = this.add.text(this.p1Rocket.x,this.p1Rocket.y,6,this.scoreConfig).setOrigin(0.5,0.5);
+        let timeConfig = {
+            fontFamily: 'Arial',
+            fontSize: '15px',
+            color: '#8b1db5',
+            align: 'left',
+        }
+        this.timeLeft = this.add.text(this.p1Rocket.x,this.p1Rocket.y,6,timeConfig);
         
+        this.anims.resumeAll();
 
+        // UI is rendered last.
+        let bigConfig = {
+            fontFamily: 'Arial',
+            fontSize: '28px',
+            color: '#8b1db5',
+            stroke: '#fff',
+            strokeThickness: 2,
+            align: 'center',
+            padding: {
+                top: 5,
+                bottom: 5,
+            },
+        }
+        this.scoreLeft = this.add.text(game.config.width/2,0,this.p1Score, bigConfig).setOrigin(0.5,0);
     }
 
     update() {
@@ -91,10 +113,11 @@ class Play extends Phaser.Scene {
         //}
 
         //scroll starfield
-        this.starfield.tilePositionX -= 4;
 
 
         if (!this.gameOver){
+            // the grassfield
+            this.starfield.tilePositionX -= 4;
             this.p1Rocket.update();
             this.ship01.update();
             this.ship02.update();
@@ -119,8 +142,8 @@ class Play extends Phaser.Scene {
         if(Phaser.Math.Snap.Ceil(6 - this.clock.getElapsedSeconds(),1) != this.timeLeft.text){
             this.timeLeft.text = Phaser.Math.Snap.Ceil(6 - this.clock.getElapsedSeconds(),1);
         }
-        this.timeLeft.x = this.p1Rocket.x;
-        this.timeLeft.y = this.p1Rocket.y;
+        this.timeLeft.x = this.p1Rocket.x+this.p1Rocket.width;
+        this.timeLeft.y = this.p1Rocket.y+this.p1Rocket.height;
     }
 
     checkCollision(rocket, ship) {
@@ -137,8 +160,8 @@ class Play extends Phaser.Scene {
 
     shipExplode(ship) {
         ship.alpha = 0;
-        let boom = this.add.sprite(ship.x, ship.y, 'explosion').setOrigin(0,0);
-        boom.anims.play('explode');
+        let boom = this.add.sprite(ship.x, ship.y, 'person').setOrigin(0,0);
+        boom.anims.play('death');
         boom.on('animationcomplete', () =>{
             ship.reset();
             ship.alpha = 1;
@@ -149,7 +172,6 @@ class Play extends Phaser.Scene {
         this.scoreLeft.text = this.p1Score;
 
         this.sound.play('sfx_explosion');
-        console.log('played audio');
 
         // reset 6 second timer
         this.clock.remove();
@@ -161,8 +183,9 @@ class Play extends Phaser.Scene {
         this.add.text(game.config.width/2, game.config.height/2-64, 'GAME OVER', this.scoreConfig).setOrigin(0.5);
         highscore.sort();
         this.add.text(game.config.width/2, game.config.height/2, 'Current High Score', this.scoreConfig).setOrigin(0.5);
-        this.add.text(game.config.width/2, game.config.height/2+32, highscore[highscore.length-1], this.scoreConfig).setOrigin(0.5);
-        this.add.text(game.config.width/2, game.config.height/2+96, 'Click to Continue', this.scoreConfig).setOrigin(0.5);
+        this.add.text(game.config.width/2, game.config.height/2+45, highscore[highscore.length-1], this.scoreConfig).setOrigin(0.5);
+        this.add.text(game.config.width/2, game.config.height/2+100, 'Click to Continue', this.scoreConfig).setOrigin(0.5);
         this.gameOver = true;
+        this.anims.pauseAll();
     }
 }

@@ -24,44 +24,38 @@ class Rocket extends Phaser.GameObjects.Sprite {
         scene.input.on('pointermove', function (pointer) {
             this.pointposition.x = pointer.x;
             this.pointposition.y = pointer.y;
-        }, this)
+        }, this);
+
+
+        // click registry
+        scene.input.mouse.disableContextMenu();
+        scene.input.on('pointerup', function () {
+            if(!this.isFiring){
+                this.sfxRocket.play();
+            }
+            this.isFiring = true;
+        }, this);
+
     }
 
     update() {
-        // left/right movement
-        if(!this.isFiring) {
-            if(keyLEFT.isDown && this.x >= 47){
-                this.x -= 2;
-            }
-            else if (keyRIGHT.isDown && this.x <= 578) {
-                this.x += 2;
-            }
-
-        }
-
-        // fire button
-        if(Phaser.Input.Keyboard.JustDown(keyF)){
-            this.isFiring = true;
-            this.sfxRocket.play(); // play sfx
-        }
 
         // calculating acceleration
         this.acceleration.x = this.pointposition.x - this.x;
         this.acceleration.y = this.pointposition.y - this.y;
 
         // if fired, move up
-        if(this.isFiring && this.y >= 108) {
+        if(this.isFiring) {
             this.direction.x += this.acceleration.x/5000;
             this.direction.y += this.acceleration.y/5000;
             this.y += 2*this.direction.y;
             this.x += 2*this.direction.x;
         }
 
-        // reset on miss
-        if(this.y <= 108) {
-            this.reset();
-        }
-
+        // you're not allowed to miss
+        //if(this.y <= 108) {
+        //    this.reset();
+        //}
         
     }
     //reset rocket to "ground"
